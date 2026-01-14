@@ -1,10 +1,19 @@
-function App() {
+import { Footer } from "./components/Footer";
+import { Navbar } from "./components/Navbar";
+import { AboutSection } from "./components/sections/AboutSection";
+import { HomeSection } from "./components/sections/HomeSection";
 
+function App() {
   return (
     <>
-      <p>Hola mundo</p>
+      <Navbar />
+      <main>
+        <HomeSection />
+        <AboutSection />
+      </main>
+      <Footer />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
