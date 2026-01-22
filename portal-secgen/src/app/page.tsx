@@ -1,3 +1,4 @@
+import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 
 export default function Home() {
@@ -50,7 +51,7 @@ export default function Home() {
         </h3>
         <div className="flex flex-col xl:flex-row items-center justify-between gap-24">
           <div className="flex flex-col gap-8">
-            <h4 className="text-3xl font-bold">Misión.</h4>
+            <h4 className="text-3xl font-bold text-black">Misión.</h4>
             <div className="space-y-2 text-[#4B4B4B]">
               <p>
                 La Secretaría General realiza tareas específicas y cumple
@@ -82,6 +83,12 @@ export default function Home() {
          * Visión
          */
       }
+      {
+        /**
+         * Pie de la página web
+         */
+      }
+      <Footer></Footer>
     </>
   );
 }
