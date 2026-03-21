@@ -41,9 +41,9 @@ const GallerySection: React.FC<{ id?: string }> = ({ id }) => {
   };
 
   return (
-    <section id={id} className="py-32 px-6 bg-surface-low flex flex-col items-center relative z-10 overflow-hidden">
+    <section id={id} className="py-32 px-6 bg-surface-low flex flex-col items-center relative z-10 overflow-hidden" role="region" aria-label="Galería de fotos de los novios">
       {/* Background Decorative Shadows */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 overflow-hidden" aria-hidden="true">
         <div className="absolute top-20 -left-20 w-80 h-80 bg-primary-custom/10 rounded-full blur-[100px]" />
         <div className="absolute bottom-40 -right-20 w-80 h-80 bg-primary-container/10 rounded-full blur-[100px]" />
       </div>
@@ -55,7 +55,7 @@ const GallerySection: React.FC<{ id?: string }> = ({ id }) => {
         transition={{ duration: 1 }}
         className="mb-8 relative z-20"
       >
-        <Heart size={36} fill="#7a5642" stroke="#7a5642" strokeWidth={0} />
+        <Heart size={36} fill="#7a5642" stroke="#7a5642" strokeWidth={0} aria-hidden="true" />
       </motion.div>
 
       <motion.h2 
@@ -81,7 +81,9 @@ const GallerySection: React.FC<{ id?: string }> = ({ id }) => {
             custom={img.rotate}
             variants={itemVariants}
             whileHover={{ scale: 1.05, zIndex: 50, transition: { duration: 0.3 } }}
-            className="absolute w-[180px] p-3 pb-8 bg-white shadow-xl rounded-sm border border-black/5 cursor-pointer"
+            whileTap={{ scale: 1.1, zIndex: 60 }}
+            className="absolute w-[180px] p-3 pb-8 bg-white shadow-xl rounded-sm border border-black/5 cursor-pointer touch-action-manipulation"
+            aria-label={`Momento de Denis y Lizbeth - ${img.date}`}
             style={{ 
               left: `${img.x}%`, 
               top: `${Math.floor(idx / 2) * 350 + img.y}px`,
@@ -92,12 +94,13 @@ const GallerySection: React.FC<{ id?: string }> = ({ id }) => {
             <div 
               className="absolute -top-4 left-1/2 -translate-x-1/2 w-16 h-8 bg-white/40 backdrop-blur-sm border border-white/20 shadow-sm opacity-60 z-10"
               style={{ rotate: `${img.tapeRotate}deg` }}
+              aria-hidden="true"
             />
 
             <div className="relative aspect-square overflow-hidden mb-3 bg-surface-highest">
               <Image 
                 src={img.src} 
-                alt={`Moment ${idx + 1}`} 
+                alt={`Imagen ${idx + 1} de la galería - ${img.date}`} 
                 fill 
                 className="object-cover" 
               />
@@ -119,7 +122,7 @@ const GallerySection: React.FC<{ id?: string }> = ({ id }) => {
         transition={{ delay: 1 }}
         className="mt-20 text-center relative z-20"
       >
-        <span className="font-handwritten text-4xl text-primary-custom/40 italic">
+        <span className="font-handwritten text-4xl text-primary-custom/40 italic" aria-label="Texto decorativo: Nuestra Boda 2026">
           Nuestra Boda 2026
         </span>
       </motion.div>

@@ -17,14 +17,15 @@ const Hero: React.FC = () => {
   return (
     <section className="relative min-h-dvh flex flex-col items-center justify-between py-20 bg-surface overflow-hidden">
       {/* Top Navigation Overlay */}
-      <div className="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-10 z-40 bg-surface/5 backdrop-blur-sm">
-        <BookOpen size={20} className="text-on-surface-custom/60" />
-        <span className="font-serif text-lg italic text-primary-custom">
+      <nav className="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-10 z-40 bg-surface/5 backdrop-blur-sm">
+        <BookOpen size={20} className="text-on-surface-custom/60" aria-hidden="true" />
+        <span className="font-serif text-lg italic text-primary-custom" role="text">
           Denis y Lizbeth
         </span>
-        <button
-          onClick={toggleMute}
+        <button 
+          onClick={toggleMute} 
           className="p-2 transition-transform active:scale-95 cursor-pointer"
+          aria-label={isMuted ? "Activar música" : "Silenciar música"}
         >
           {isMuted ? (
             <VolumeX size={20} className="text-primary-custom" />
@@ -32,7 +33,7 @@ const Hero: React.FC = () => {
             <Volume2 size={20} className="text-on-surface-custom/60" />
           )}
         </button>
-      </div>
+      </nav>
 
       {/* Background with Fade In */}
       <motion.div
@@ -54,7 +55,7 @@ const Hero: React.FC = () => {
       </motion.div>
 
       {/* Content */}
-      <div className="relative z-20 flex flex-col items-center justify-center text-center px-8 w-full mt-32">
+      <div className="relative z-20 flex flex-col items-center justify-center text-center px-8 w-full mt-20">
         <motion.h1
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
