@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+  --font-handwritten: var(--font-handwritten);
+
+  --color-surface: #fdf9f3;
+  --color-surface-low: #f7f3ed;
+  --color-surface-highest: #e6e2dc;
+  --color-primary-custom: #7a5642;
+  --color-primary-container: #d0a38b;
+  --color-on-primary-custom: #ffffff;
+  --color-on-surface-custom: #1c1c18;
+  --color-tertiary-custom: #2e4a3e;
+  --color-outline-variant-custom: #d4c4b7;
+
+  --shadow-ambient: 0px 20px 40px rgba(28, 28, 24, 0.05);
+}
+
+:root {
+  --background: #fdf9f3;
+  --foreground: #1c1c18;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: var(--font-serif), serif;
+}
+
+.font-sans {
+  font-family: var(--font-sans), sans-serif;
+}
+
+.font-handwritten {
+  font-family: var(--font-handwritten), cursive;
+}
+
+/* Custom Utilities */
+.glass-nav {
+  background-color: rgba(253, 249, 243, 0.8);
+  backdrop-filter: blur(20px);
+}
+
+.satin-gradient {
+  background: linear-gradient(135deg, #7a5642 0%, #d0a38b 100%);
+}
+
+.mobile-container {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  min-height: 100vh;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
