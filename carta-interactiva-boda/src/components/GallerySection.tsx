@@ -1,18 +1,108 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import React from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { Heart } from "lucide-react";
 
 const GallerySection: React.FC<{ id?: string }> = ({ id }) => {
   const images = [
-    { src: '/assets/boda-imagen-2.jpg', date: 'Agosto 2023', rotate: -3, x: 5, y: 10, tapeRotate: 2 },
-    { src: '/assets/boda-imagen-3.jpg', date: 'Enero 2024', rotate: 4, x: 45, y: -20, tapeRotate: -3 },
-    { src: '/assets/boda-imagen-4.jpg', date: 'Marzo 2024', rotate: -6, x: 2, y: 30, tapeRotate: -1 },
-    { src: '/assets/boda-imagen-5.jpg', date: 'Junio 2024', rotate: 2, x: 52, y: 40, tapeRotate: 4 },
-    { src: '/assets/boda-imagen-6.jpg', date: 'Septiembre 2024', rotate: -4, x: 8, y: 20, tapeRotate: -2 },
-    { src: '/assets/boda-imagen-7.jpg', date: 'Diciembre 2024', rotate: 5, x: 48, y: 10, tapeRotate: 3 },
+    {
+      src: "/boda/lizveth.jpg",
+      date: "La novia",
+      rotate: -3,
+      x: 2,
+      y: 10,
+      tapeRotate: 2,
+    },
+    {
+      src: "/boda/denis.jpg",
+      date: "El novio",
+      rotate: 4,
+      x: 45,
+      y: -20,
+      tapeRotate: -3,
+    },
+    {
+      src: "/boda/boda-3.jpg",
+      date: "Denis & Lizveth",
+      rotate: -3,
+      x: 2,
+      y: 10,
+      tapeRotate: 2,
+    },
+    {
+      src: "/boda/boda-4.jpg",
+      date: "Un beso profundo",
+      rotate: 4,
+      x: 45,
+      y: -20,
+      tapeRotate: -3,
+    },
+    {
+      src: "/boda/boda-5.jpg",
+      date: "Mis hermanas",
+      rotate: -6,
+      x: 5,
+      y: 30,
+      tapeRotate: -1,
+    },
+    {
+      src: "/boda/boda-6.jpg",
+      date: "La gran torta",
+      rotate: 2,
+      x: 48,
+      y: 40,
+      tapeRotate: 4,
+    },
+    {
+      src: "/boda/boda-7.jpg",
+      date: "Mis primos",
+      rotate: -4,
+      x: 3,
+      y: 20,
+      tapeRotate: -2,
+    },
+    {
+      src: "/boda/boda-8.jpg",
+      date: "Nuestra boda 2026",
+      rotate: 5,
+      x: 42,
+      y: 10,
+      tapeRotate: 3,
+    },
+    {
+      src: "/boda/boda-9.jpg",
+      date: "Beso inclinado",
+      rotate: -2,
+      x: 8,
+      y: 24,
+      tapeRotate: -3,
+    },
+    {
+      src: "/boda/boda-10.jpg",
+      date: "Ceremonia",
+      rotate: 3,
+      x: 46,
+      y: 14,
+      tapeRotate: 2,
+    },
+    {
+      src: "/boda/boda-11.jpg",
+      date: "Baúl de mensajes",
+      rotate: -4,
+      x: 1,
+      y: 36,
+      tapeRotate: -2,
+    },
+    {
+      src: "/boda/boda-12.png",
+      date: "Ensayo de boda",
+      rotate: 4,
+      x: 44,
+      y: 12,
+      tapeRotate: 3,
+    },
   ];
 
   const containerVariants = {
@@ -20,45 +110,59 @@ const GallerySection: React.FC<{ id?: string }> = ({ id }) => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15
-      }
-    }
+        staggerChildren: 0.15,
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { y: 100, opacity: 0, scale: 0.8 },
-    visible: (custom: number) => ({ 
-      y: 0, 
-      opacity: 1, 
+    visible: (custom: number) => ({
+      y: 0,
+      opacity: 1,
       scale: 1,
       rotate: custom,
       transition: {
         type: "spring",
         stiffness: 80,
-        damping: 12
-      } as const
-    })
+        damping: 12,
+      } as const,
+    }),
   };
 
   return (
-    <section id={id} className="py-32 px-6 bg-surface-low flex flex-col items-center relative z-10 overflow-hidden" role="region" aria-label="Galería de fotos de los novios">
+    <section
+      id={id}
+      className="py-32 px-6 bg-surface-low flex flex-col items-center relative z-10 overflow-hidden"
+      role="region"
+      aria-label="Galería de fotos de los novios"
+    >
       {/* Background Decorative Shadows */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 overflow-hidden" aria-hidden="true">
+      <div
+        className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 overflow-hidden"
+        aria-hidden="true"
+      >
         <div className="absolute top-20 -left-20 w-80 h-80 bg-primary-custom/10 rounded-full blur-[100px]" />
         <div className="absolute bottom-40 -right-20 w-80 h-80 bg-primary-container/10 rounded-full blur-[100px]" />
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         whileInView={{ scale: 1, opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 1 }}
         className="mb-8 relative z-20"
       >
-        <Heart size={36} fill="#7a5642" stroke="#7a5642" strokeWidth={0} aria-hidden="true" />
+        <Heart
+          size={36}
+          fill="#7a5642"
+          stroke="#7a5642"
+          strokeWidth={0}
+          aria-hidden="true"
+        />
       </motion.div>
 
-      <motion.h2 
+      <motion.h2
         initial={{ y: 20, opacity: 0 }}
         whileInView={{ y: 0, opacity: 1 }}
         transition={{ duration: 1, delay: 0.3 }}
@@ -68,44 +172,48 @@ const GallerySection: React.FC<{ id?: string }> = ({ id }) => {
       </motion.h2>
 
       {/* Scattered Polaroid Collage */}
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
-        className="relative w-full max-w-lg min-h-[1100px] mt-10"
+        className="relative w-full max-w-lg min-h-[2150px] mt-10"
       >
         {images.map((img, idx) => (
-          <motion.div 
+          <motion.div
             key={idx}
             custom={img.rotate}
             variants={itemVariants}
-            whileHover={{ scale: 1.05, zIndex: 50, transition: { duration: 0.3 } }}
+            whileHover={{
+              scale: 1.05,
+              zIndex: 50,
+              transition: { duration: 0.3 },
+            }}
             whileTap={{ scale: 1.1, zIndex: 60 }}
-            className="absolute w-[180px] p-3 pb-8 bg-white shadow-xl rounded-sm border border-black/5 cursor-pointer touch-action-manipulation"
-            aria-label={`Momento de Denis y Lizbeth - ${img.date}`}
-            style={{ 
-              left: `${img.x}%`, 
+            className="absolute w-[160px] sm:w-[180px] p-3 pb-8 bg-white shadow-xl rounded-sm border border-black/5 cursor-pointer touch-action-manipulation"
+            aria-label={`Momento de Denis y Lizveth - ${img.date}`}
+            style={{
+              left: `${img.x}%`,
               top: `${Math.floor(idx / 2) * 350 + img.y}px`,
-              transformOrigin: "center center"
+              transformOrigin: "center center",
             }}
           >
             {/* Tape Decoration */}
-            <div 
+            <div
               className="absolute -top-4 left-1/2 -translate-x-1/2 w-16 h-8 bg-white/40 backdrop-blur-sm border border-white/20 shadow-sm opacity-60 z-10"
               style={{ rotate: `${img.tapeRotate}deg` }}
               aria-hidden="true"
             />
 
             <div className="relative aspect-square overflow-hidden mb-3 bg-surface-highest">
-              <Image 
-                src={img.src} 
-                alt={`Imagen ${idx + 1} de la galería - ${img.date}`} 
-                fill 
-                className="object-cover" 
+              <Image
+                src={img.src}
+                alt={`Imagen ${idx + 1} de la galería - ${img.date}`}
+                fill
+                className="object-cover"
               />
             </div>
-            
+
             <div className="text-right pr-1">
               <span className="font-handwritten text-lg text-on-surface-custom/70">
                 {img.date}
@@ -116,13 +224,16 @@ const GallerySection: React.FC<{ id?: string }> = ({ id }) => {
       </motion.div>
 
       {/* Decorative Text */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ delay: 1 }}
         className="mt-20 text-center relative z-20"
       >
-        <span className="font-handwritten text-4xl text-primary-custom/40 italic" aria-label="Texto decorativo: Nuestra Boda 2026">
+        <span
+          className="font-handwritten text-4xl text-primary-custom/40 italic"
+          aria-label="Texto decorativo: Nuestra Boda 2026"
+        >
           Nuestra Boda 2026
         </span>
       </motion.div>

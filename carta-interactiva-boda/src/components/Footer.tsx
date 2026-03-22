@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
         transition={{ duration: 1.2 }}
         className="font-serif text-[2.5rem] text-primary-custom tracking-tight mb-12"
       >
-        Denis y Lizbeth
+        Denis y Livbeth
       </motion.h2>
 
       <div className="flex items-center justify-center gap-10 mb-10 w-full px-8">

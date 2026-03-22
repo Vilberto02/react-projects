@@ -20,8 +20,8 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "Boda de Denis & Lizbeth",
-  description: "Nuestra historia - Denis y Lizbeth",
+  title: "Boda de Denis & Lizveth",
+  description: "Nuestra historia - Denis y Lizveth",
 };
 
 export default function RootLayout({

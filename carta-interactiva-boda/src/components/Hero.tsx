@@ -18,12 +18,19 @@ const Hero: React.FC = () => {
     <section className="relative min-h-dvh flex flex-col items-center justify-between py-20 bg-surface overflow-hidden">
       {/* Top Navigation Overlay */}
       <nav className="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-10 z-40 bg-surface/5 backdrop-blur-sm">
-        <BookOpen size={20} className="text-on-surface-custom/60" aria-hidden="true" />
-        <span className="font-serif text-lg italic text-primary-custom" role="text">
-          Denis y Lizbeth
+        <BookOpen
+          size={20}
+          className="text-on-surface-custom/60"
+          aria-hidden="true"
+        />
+        <span
+          className="font-serif text-lg italic text-primary-custom"
+          role="text"
+        >
+          Denis y Lizveth
         </span>
-        <button 
-          onClick={toggleMute} 
+        <button
+          onClick={toggleMute}
           className="p-2 transition-transform active:scale-95 cursor-pointer"
           aria-label={isMuted ? "Activar música" : "Silenciar música"}
         >
@@ -62,7 +69,7 @@ const Hero: React.FC = () => {
           transition={{ duration: 1, delay: 0.5 }}
           className="font-serif text-[3.5rem] leading-tight text-on-surface-custom mb-6 drop-shadow-sm"
         >
-          Denis y Lizbeth
+          Denis y Lizveth
         </motion.h1>
 
         <motion.p
