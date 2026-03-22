@@ -10,6 +10,7 @@ const messages = [
   "Habrá momentos fáciles, llenos de risas y complicidad, pero también llegarán días en los que no todo sea tan claro. Y es ahí donde el amor verdadero se fortalece: no en la perfección, sino en la forma en que deciden quedarse, escucharse y entenderse.",
   "Recuerden siempre hablar desde el respeto, escuchar con el corazón abierto y nunca dejar que el orgullo hable más fuerte que el cariño. Porque a veces, una conversación a tiempo puede evitar silencios que pesan.",
   "Que nunca falten los detalles, las palabras sinceras y los abrazos que lo dicen todo sin hablar. Y que, pase lo que pase, siempre recuerden por qué comenzaron: porque en medio de todo, se eligieron... y siguen eligiéndose cada día.",
+  "No se olviden de la COCOA. En los días buenos y en los difíciles, que la comunicación los acerque, la cooperación los fortalezca, y el amor los mantenga siempre unidos.",
 ];
 
 const LetterSection: React.FC = () => {
