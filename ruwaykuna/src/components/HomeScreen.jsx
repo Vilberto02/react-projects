@@ -2,7 +2,10 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import CardTask from "./CardTask";
 
 export default function HomeScreen() {
-  const name = "Alberto";
+  const user = {
+    name: "Alberto",
+    lastname: "Patricio",
+  };
   const tasks = [
     {
       id: 1,
@@ -25,13 +28,20 @@ export default function HomeScreen() {
   ];
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.textTitle}>Hola, {name}</Text>
+      <View style={{ flexDirection: "column", gap: 4 }}>
+        <Text style={{ color: "#fff", fontSize: 32, fontWeight: "700" }}>
+          Hola
+        </Text>
+        <Text style={{ color: "#EADDFF", fontSize: 44, fontWeight: "700" }}>
+          {user.name} {user.lastname}
+        </Text>
+      </View>
       <View style={styles.containerTasks}>
         <View style={styles.containerResumen}>
           <Text style={{ color: "#fff", fontSize: 20, fontWeight: "700" }}>
             Hoy
           </Text>
-          <Text style={{ color: "#fff" }}>{tasks.length} Tareas</Text>
+          <Text style={{ color: "#EADDFF" }}>{tasks.length} Tareas</Text>
         </View>
         <View style={styles.containerListTasks}>
           {tasks.map((task) => (
@@ -63,6 +73,6 @@ export const styles = StyleSheet.create({
   containerListTasks: {
     marginTop: 24,
     flexDirection: "column",
-    gap: 20,
+    gap: 16,
   },
 });
