@@ -1,12 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
-import { Image } from "react-native-web";
+import { StyleSheet, View } from "react-native";
+import HomeScreen from "./src/components/HomeScreen";
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text style={{ color: "#fff" }}>
-        Open up App.js to start working on your app!
-      </Text>
+      <HomeScreen />
     </View>
   );
 }
@@ -15,7 +13,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
-    alignItems: "center",
     padding: 50,
   },
 });
