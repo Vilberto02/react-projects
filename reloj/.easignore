@@ -1,0 +1,28 @@
+node_modules/
+.expo/
+dist/
+web-build/
+.git/
+.vscode/
+
+# Native folders (EAS generates these during build)
+/ios
+/android
+
+# Debug files
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# OS files
+.DS_Store
+
+# Env files (Add specific .env if you don't want them uploaded)
+.env*.local
+
+# Typescript
+*.tsbuildinfo
+expo-env.d.ts
+
+# Misc
+app-example/

@@ -91,7 +91,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="timer"
           options={{
-            title: "TEMPORIZADOR",
+            title: "POMODORO",
             tabBarIcon: ({ color }) => <Hourglass color={color} size={24} />,
           }}
         />
