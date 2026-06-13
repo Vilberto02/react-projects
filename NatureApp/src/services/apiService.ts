@@ -4,7 +4,7 @@ import StorageService from "./storageService";
 // Conexión con backend Express/Node.js
 // Usa fetch con async/await (asincronía)
 // ============================================
-const BASE_URL = "http://192.168.1.100:9090/api";
+const BASE_URL = "http://192.168.18.95:9090/api";
 // Helper para peticiones HTTP con manejo de errores
 async function request(endpoint: string, options: RequestInit = {}) {
   try {

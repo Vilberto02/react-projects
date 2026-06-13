@@ -1,4 +1,5 @@
 import React from "react";
+import { useFocusEffect } from "expo-router";
 import { Product } from "../../src/models/Product";
 import {
   ActivityIndicator,
@@ -35,7 +36,14 @@ export default function HomeScreen() {
     search,
     refresh,
   } = useProducts();
-  const { addItem } = useCart();
+  const { addItem, refresh: refreshCart } = useCart();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh();
+      refreshCart();
+    }, [refresh, refreshCart])
+  );
   const handleAddToCart = async (product: Product) => {
     try {
       await addItem(product);

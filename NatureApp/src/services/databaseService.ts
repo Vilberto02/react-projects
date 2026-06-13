@@ -6,12 +6,19 @@ import { Product } from "../models/Product";
 // Para carrito, favoritos, operaciones CRUD
 // ============================================
 let db: SQLite.SQLiteDatabase | null = null;
+let initPromise: Promise<void> | null = null;
+
 const DatabaseService = {
   // --- INICIALIZAR base de datos ---
   async init() {
-    db = await SQLite.openDatabaseAsync("naturapp.db");
-    // Crear tabla del carrito de compras
-    await db.execAsync(`
+    if (initPromise) {
+      return initPromise;
+    }
+    initPromise = (async () => {
+      if (!db) {
+        db = await SQLite.openDatabaseAsync("naturapp.db");
+        // Crear tabla del carrito de compras
+        await db.execAsync(`
       CREATE TABLE IF NOT EXISTS cart (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         product_id TEXT NOT NULL UNIQUE,
@@ -34,6 +41,9 @@ const DatabaseService = {
         (datetime('now'))
       );
     `);
+      }
+    })();
+    return initPromise;
   },
   // === OPERACIONES CRUD DEL CARRITO ===
   // CREATE: Agregar producto al carrito

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useFocusEffect } from "expo-router";
 import {
   Alert,
   FlatList,
@@ -11,9 +12,15 @@ import {
 import CartItemRow from "../../src/components/CartItemRow";
 import { useCart } from "../../src/viewmodels/useCart";
 export default function CartScreen() {
-  const { items, total, loading, updateQuantity, removeItem, checkout } =
+  const { items, total, loading, updateQuantity, removeItem, checkout, refresh } =
     useCart();
   const [address, setAddress] = useState("");
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
   const handleCheckout = async () => {
     try {
       const order = await checkout(address);
