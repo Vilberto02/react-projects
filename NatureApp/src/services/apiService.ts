@@ -1,77 +1,99 @@
-import StorageService from "./storageService";
-// ============================================
-// PERSISTENCIA REMOTA - API REST
-// Conexión con backend Express/Node.js
-// Usa fetch con async/await (asincronía)
-// ============================================
+// src/services/apiService.ts
+// Módulo centralizado de comunicación con el backend
+import { Order, User, Product, Category, Cart, CartItem, ApiResponse } from '../types/types';
+
 const BASE_URL = "http://192.168.18.95:9090/api";
-// Helper para peticiones HTTP con manejo de errores
-async function request(endpoint: string, options: RequestInit = {}) {
+
+let authToken: string | null = null;
+export const setToken = (token: string) => {
+  authToken = token;
+};
+
+export const clearToken = () => {
+  authToken = null;
+};
+
+// ── Función genérica de solicitud HTTP ──
+const request = async <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+  const url = `${BASE_URL}${endpoint}`;
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...(authToken && { Authorization: `Bearer ${authToken}` }),
+    ...options.headers,
+  };
   try {
-    const token = await StorageService.getToken();
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    const response = await fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && {
-          Authorization: `Bearer ${token}`,
-        }),
-        ...options.headers,
-      },
-    });
+      headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    } as any); // cast to any because options.body is stringified manually but RequestInit expects BodyInit
+    const data = await response.json();
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error(`API Error [${endpoint}]:`, error);
-    throw error;
-  }
-}
-const ApiService = {
-  // === PRODUCTOS (READ) ===
-  async getProducts(category: string | null = null) {
-    const query = category ? `?category=${category}` : "";
-    return await request(`/products${query}`);
-  },
-  async getProductById(id: string) {
-    return await request(`/products/${id}`);
-  },
-  async searchProducts(query: string) {
-    return await request(`/products/search?q=${encodeURIComponent(query)}`);
-  },
-  // === PEDIDOS (CRUD completo) ===
-  // CREATE: Crear nuevo pedido
-  async createOrder(orderData: any) {
-    return await request("/orders", {
-      method: "POST",
-      body: JSON.stringify(orderData),
-    });
-  },
-  // READ: Obtener historial de pedidos
-  async getOrders() {
-    return await request("/orders");
-  },
-  // READ: Detalle de un pedido
-  async getOrderById(id: string) {
-    return await request(`/orders/${id}`);
-  },
-  // === AUTENTICACIÓN ===
-  async login(email: string, password: string) {
-    const data = await request("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-    // Guarda token en persistencia básica
-    if (data.token) {
-      await StorageService.saveToken(data.token);
-      await StorageService.saveUserProfile(data.user.name, data.user.email);
+      throw new Error(data.message || `Error HTTP ${response.status}`);
     }
     return data;
-  },
-  // === CATEGORÍAS ===
-  async getCategories() {
-    return await request("/categories");
-  },
+  } catch (error: any) {
+    if (error.name === "TypeError") {
+      throw new Error("Error de conexión con el servidor");
+    }
+    throw error;
+  }
 };
-export default ApiService;
+
+// ── Módulo de Productos ──
+export const ProductAPI = {
+  getAll: (params: any = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request<ApiResponse<Product[]>>(`/products?${query}`);
+  },
+  getById: (id: string) => request<ApiResponse<Product>>(`/products/${id}`),
+  search: (term: string) => request<ApiResponse<Product[]>>(`/products?search=${term}`),
+};
+
+// ── Módulo de Categorías ──
+export const CategoryAPI = {
+  getAll: () => request<ApiResponse<Category[]>>("/categories"),
+};
+
+// ── Módulo de Autenticación ──
+export const AuthAPI = {
+  login: (email: string, password: string) =>
+    request<ApiResponse<{ user: User, token: string }>>("/users/login", {
+      method: "POST",
+      body: { email, password } as any,
+    }),
+  register: (userData: any) =>
+    request<ApiResponse<{ user: User, token: string }>>("/users/register", {
+      method: "POST",
+      body: userData,
+    }),
+  getProfile: () => request<ApiResponse<User>>("/users/profile"),
+  updateProfile: (data: any) =>
+    request<ApiResponse<User>>("/users/profile", {
+      method: "PUT",
+      body: data,
+    }),
+};
+
+// ── Módulo de Carrito ──
+export const CartAPI = {
+  get: () => request<ApiResponse<Cart>>("/cart"),
+  addItem: (item: any) => request<ApiResponse<Cart>>("/cart/add", { method: "POST", body: item }),
+  updateQuantity: (productId: string, quantity: number) =>
+    request<ApiResponse<Cart>>(`/cart/${productId}`, {
+      method: "PUT",
+      body: { quantity } as any,
+    }),
+  removeItem: (productId: string) =>
+    request<ApiResponse<Cart>>(`/cart/${productId}`, { method: "DELETE" }),
+  clear: () => request<ApiResponse<Cart>>("/cart", { method: "DELETE" }),
+};
+
+// ── Módulo de Pedidos ──
+export const OrderAPI = {
+  create: (orderData: any) =>
+    request<ApiResponse<Order>>("/orders", { method: "POST", body: orderData }),
+  getAll: () => request<ApiResponse<Order[]>>("/orders"),
+  getById: (id: string) => request<ApiResponse<Order>>(`/orders/${id}`),
+  cancel: (id: string) => request<ApiResponse<Order>>(`/orders/${id}/cancel`, { method: "PUT" }),
+};

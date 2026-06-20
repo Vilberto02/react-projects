@@ -1,0 +1,30 @@
+[
+  {
+    "_id": { "$oid": "60d5ec49f1b2c4d5e6f7a8b1" },
+    "name": "Suplementos",
+    "description": "Vitaminas, minerales y extractos naturales para complementar tu nutrición diaria y mejorar tu bienestar.",
+    "icon": "medical-outline",
+    "isActive": true
+  },
+  {
+    "_id": { "$oid": "60d5ec49f1b2c4d5e6f7a8b2" },
+    "name": "Cuidado Personal",
+    "description": "Productos de higiene y belleza elaborados con ingredientes orgánicos y libres de químicos tóxicos.",
+    "icon": "body-outline",
+    "isActive": true
+  },
+  {
+    "_id": { "$oid": "60d5ec49f1b2c4d5e6f7a8b3" },
+    "name": "Alimentos Orgánicos",
+    "description": "Superalimentos, semillas y granos cultivados sin pesticidas, directos del campo a tu mesa.",
+    "icon": "nutrition-outline",
+    "isActive": true
+  },
+  {
+    "_id": { "$oid": "60d5ec49f1b2c4d5e6f7a8b4" },
+    "name": "Aceites Esenciales",
+    "description": "Extractos aromáticos puros de plantas para usos terapéuticos, masajes y relajación profunda.",
+    "icon": "water-outline",
+    "isActive": true
+  }
+]

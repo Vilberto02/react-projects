@@ -1,98 +1,75 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { CartItem } from '../models/CartItem';
+// src/components/CartItemRow.tsx
+import { Ionicons } from "@expo/vector-icons";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { CartItem } from "../types/types";
 
 interface CartItemRowProps {
   item: CartItem;
-  onIncrease: () => void;
-  onDecrease: () => void;
+  onUpdateQty: (qty: number) => void;
   onRemove: () => void;
 }
 
-export default function CartItemRow({ item, onIncrease, onDecrease, onRemove }: CartItemRowProps) {
+export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRowProps) {
   return (
-    <View style={styles.container}>
+    <View style={styles.row}>
       <Image source={{ uri: item.image }} style={styles.image} />
-      <View style={styles.details}>
-        <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
+      <View style={styles.info}>
+        <Text style={styles.name} numberOfLines={2}>
+          {item.name}
+        </Text>
         <Text style={styles.price}>S/ {item.price.toFixed(2)}</Text>
+        <View style={styles.qtyRow}>
+          <TouchableOpacity
+            onPress={() => onUpdateQty(item.quantity - 1)}
+            style={styles.qtyBtn}
+          >
+            <Ionicons name="remove-circle-outline" size={24} color="#1A5276" />
+          </TouchableOpacity>
+          <Text style={styles.qty}>{item.quantity}</Text>
+          <TouchableOpacity
+            onPress={() => onUpdateQty(item.quantity + 1)}
+            style={styles.qtyBtn}
+          >
+            <Ionicons name="add-circle-outline" size={24} color="#1A5276" />
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.btn} onPress={onDecrease}>
-          <Text style={styles.btnText}>-</Text>
-        </TouchableOpacity>
-        <Text style={styles.quantity}>{item.quantity}</Text>
-        <TouchableOpacity style={styles.btn} onPress={onIncrease}>
-          <Text style={styles.btnText}>+</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.removeBtn} onPress={onRemove}>
-          <Text style={styles.removeText}>X</Text>
+      <View style={styles.right}>
+        <Text style={styles.subtotal}>
+          S/ {(item.price * item.quantity).toFixed(2)}
+        </Text>
+        <TouchableOpacity onPress={onRemove} style={styles.removeBtn}>
+          <Ionicons name="trash-outline" size={20} color="#E74C3C" />
         </TouchableOpacity>
       </View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: '#FFF',
-    borderRadius: 8,
-    padding: 8,
-    marginBottom: 8,
-    alignItems: 'center',
-    elevation: 1,
+  row: {
+    flexDirection: "row",
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  details: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  name: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  price: {
-    fontSize: 14,
-    color: '#148F77',
-    fontWeight: 'bold',
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  btn: {
-    backgroundColor: '#E0E0E0',
-    width: 28,
-    height: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 14,
-  },
-  btnText: {
+  image: { width: 70, height: 70, borderRadius: 8, backgroundColor: "#ECF0F1" },
+  info: { flex: 1, marginLeft: 12 },
+  name: { fontSize: 14, fontWeight: "600", color: "#2C3E50" },
+  price: { fontSize: 13, color: "#7F8C8D", marginTop: 2 },
+  qtyRow: { flexDirection: "row", alignItems: "center", marginTop: 6 },
+  qtyBtn: { padding: 2 },
+  qty: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  quantity: {
+    fontWeight: "bold",
     marginHorizontal: 12,
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: "#1C2833",
   },
-  removeBtn: {
-    marginLeft: 16,
-    padding: 8,
-  },
-  removeText: {
-    color: '#E74C3C',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  right: { alignItems: "flex-end", justifyContent: "space-between" },
+  subtotal: { fontSize: 15, fontWeight: "bold", color: "#1A5276" },
+  removeBtn: { marginTop: 8 },
 });

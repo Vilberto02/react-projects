@@ -1,0 +1,77 @@
+[
+  {
+    "name": "Maca Negra Gelatinizada",
+    "description": "Poderoso energizante natural proveniente de los Andes. Ideal para el rendimiento físico y mental.",
+    "price": 35.50,
+    "category": { "$oid": "60d5ec49f1b2c4d5e6f7a8b1" },
+    "image": "https://images.unsplash.com/photo-1615486511484-93883a48e778?auto=format&fit=crop&q=80&w=400",
+    "stock": 50,
+    "isActive": true,
+    "tags": ["energía", "suplemento", "maca", "andes"],
+    "nutritionalInfo": {
+      "calories": 120,
+      "protein": "4g",
+      "fiber": "2g"
+    }
+  },
+  {
+    "name": "Vitamina C Orgánica con Camu Camu",
+    "description": "Cápsulas de vitamina C extraída del Camu Camu amazónico para reforzar tu sistema inmunológico.",
+    "price": 45.00,
+    "category": { "$oid": "60d5ec49f1b2c4d5e6f7a8b1" },
+    "image": "https://images.unsplash.com/photo-1577401239170-897942555fb3?auto=format&fit=crop&q=80&w=400",
+    "stock": 30,
+    "isActive": true,
+    "tags": ["vitamina C", "defensas", "camu camu"],
+    "nutritionalInfo": {
+      "calories": 10,
+      "protein": "0g",
+      "fiber": "0g"
+    }
+  },
+  {
+    "name": "Jabón Artesanal de Avena y Miel",
+    "description": "Jabón natural elaborado a mano, perfecto para exfoliar suavemente e hidratar la piel sensible.",
+    "price": 12.00,
+    "category": { "$oid": "60d5ec49f1b2c4d5e6f7a8b2" },
+    "image": "https://images.unsplash.com/photo-1600857062241-98e5dba7f214?auto=format&fit=crop&q=80&w=400",
+    "stock": 100,
+    "isActive": true,
+    "tags": ["jabón", "piel sensible", "avena", "miel"]
+  },
+  {
+    "name": "Shampoo Sólido de Romero",
+    "description": "Shampoo ecológico sin envases plásticos que estimula el crecimiento del cabello y previene su caída.",
+    "price": 22.00,
+    "category": { "$oid": "60d5ec49f1b2c4d5e6f7a8b2" },
+    "image": "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&q=80&w=400",
+    "stock": 45,
+    "isActive": true,
+    "tags": ["cabello", "ecológico", "romero"]
+  },
+  {
+    "name": "Quinoa Real Orgánica",
+    "description": "Grano entero de quinoa real de alta pureza. Excelente fuente de proteína vegetal y libre de gluten.",
+    "price": 18.50,
+    "category": { "$oid": "60d5ec49f1b2c4d5e6f7a8b3" },
+    "image": "https://images.unsplash.com/photo-1586201375761-83865001e8ac?auto=format&fit=crop&q=80&w=400",
+    "stock": 200,
+    "isActive": true,
+    "tags": ["quinoa", "superfood", "proteína", "gluten-free"],
+    "nutritionalInfo": {
+      "calories": 374,
+      "protein": "14g",
+      "fiber": "7g"
+    }
+  },
+  {
+    "name": "Aceite Esencial de Lavanda",
+    "description": "Aceite puro de lavanda de grado terapéutico. Ayuda a reducir el estrés y mejora la calidad del sueño.",
+    "price": 40.00,
+    "category": { "$oid": "60d5ec49f1b2c4d5e6f7a8b4" },
+    "image": "https://images.unsplash.com/photo-1608528577891-eb055944f2e7?auto=format&fit=crop&q=80&w=400",
+    "stock": 25,
+    "isActive": true,
+    "tags": ["aromaterapia", "lavanda", "relajación"]
+  }
+]
