@@ -94,8 +94,6 @@ npx expo start
 
 ## Vista previa de la aplicación
 
-![Home](./screens/home.jpg)
-![Productos](./screens/producto_detalle.jpg)
-![Carrito](./screens/carrito.jpg)
-![Checkout](./screens/compra.jpg)
-![Pedidos](./screens/pedidos.jpg)
+![Vista de las pantallas - Parte 01](./screens/apps_parte01.png)
+
+![Vista de las pantallas - Parte 02](./screens/apps_parte02.png)
