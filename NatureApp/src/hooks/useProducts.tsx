@@ -1,121 +1,93 @@
 // src/hooks/useProducts.tsx
-import { useCallback, useEffect, useState } from "react";
-import { CategoryAPI, ProductAPI } from "../services/apiService";
-import { Product, Category } from "../types/types";
+// ============================================
+// Hook de Productos - Firestore Service
+// Sesión 11: Consulta de productos con Firebase
+// ============================================
+
+import { useState, useEffect, useCallback } from 'react';
+import { ProductService, CategoryService } from '../services/firestoreService';
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Carga inicial de productos y categorías (paralelo)
-  const loadInitialData = useCallback(async () => {
+  // Cargar productos (opcionalmente filtrados por categoría)
+  const loadProducts = useCallback(async (categoryId: string | null = null) => {
     setLoading(true);
     setError(null);
     try {
-      const [prodRes, catRes] = await Promise.all([
-        ProductAPI.getAll({ page: 1, limit: 20 }),
-        CategoryAPI.getAll(),
-      ]);
-      setProducts(prodRes.data || []);
-      setCategories(catRes.data || []);
-      if (prodRes.pagination) {
-        setHasMore(prodRes.pagination.page < prodRes.pagination.pages);
-      }
-      setPage(1);
-    } catch (err: any) {
-      setError(err.message);
+      const data = await ProductService.getAll(categoryId);
+      setProducts(data);
+    } catch (err) {
+      console.error('Error cargando productos:', err);
+      setError('No se pudieron cargar los productos');
     } finally {
       setLoading(false);
     }
   }, []);
-  useEffect(() => {
-    loadInitialData();
-  }, [loadInitialData]);
+
+  // Cargar categorías
+  const loadCategories = useCallback(async () => {
+    try {
+      const data = await CategoryService.getAll();
+      setCategories(data);
+    } catch (err) {
+      console.error('Error cargando categorías:', err);
+    }
+  }, []);
+
+  // Buscar productos por texto
+  const searchProducts = useCallback(async (query: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ProductService.search(query);
+      setProducts(data);
+    } catch (err) {
+      console.error('Error buscando productos:', err);
+      setError('Error en la búsqueda');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Obtener producto por ID
+  const getProductById = useCallback(async (productId: string) => {
+    try {
+      return await ProductService.getById(productId);
+    } catch (err) {
+      console.error('Error obteniendo producto:', err);
+      return null;
+    }
+  }, []);
 
   // Filtrar por categoría
-  const filterByCategory = useCallback(async (categoryId: string | null) => {
-    setSelectedCategory(categoryId);
-    setLoading(true);
-    try {
-      const params = categoryId
-        ? { category: categoryId, page: 1 }
-        : { page: 1 };
-      const res = await ProductAPI.getAll(params);
-      setProducts(res.data || []);
-      if (res.pagination) {
-        setHasMore(res.pagination.page < res.pagination.pages);
-      }
-      setPage(1);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Buscar productos
-  const searchProducts = useCallback(
-    async (term: string) => {
-      if (!term.trim()) {
-        loadInitialData();
-        return;
-      }
-      setLoading(true);
-      try {
-        const res = await ProductAPI.search(term);
-        setProducts(res.data || []);
-        setHasMore(false);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+  const filterByCategory = useCallback(
+    (categoryId: string | null) => {
+      setSelectedCategory(categoryId);
+      loadProducts(categoryId);
     },
-    [loadInitialData],
+    [loadProducts]
   );
 
-  // Cargar más productos (paginación)
-  const loadMore = useCallback(async () => {
-    if (!hasMore || loading) return;
-    const nextPage = page + 1;
-    try {
-      const params: any = { page: nextPage, limit: 20 };
-      if (selectedCategory) params.category = selectedCategory;
-      const res = await ProductAPI.getAll(params);
-      setProducts((prev) => [...prev, ...(res.data || [])]);
-      if (res.pagination) {
-        setHasMore(res.pagination.page < res.pagination.pages);
-      }
-      setPage(nextPage);
-    } catch (err: any) {
-      setError(err.message);
-    }
-  }, [hasMore, loading, page, selectedCategory]);
-
-  // Pull-to-refresh
-  const refresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadInitialData();
-    setRefreshing(false);
-  }, [loadInitialData]);
+  // Carga inicial
+  useEffect(() => {
+    loadProducts();
+    loadCategories();
+  }, [loadProducts, loadCategories]);
 
   return {
     products,
     categories,
-    selectedCategory,
     loading,
-    refreshing,
     error,
-    hasMore,
-    filterByCategory,
+    selectedCategory,
+    loadProducts,
     searchProducts,
-    loadMore,
-    refresh,
+    getProductById,
+    filterByCategory,
   };
 }

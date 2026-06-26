@@ -1,81 +1,100 @@
-// app/(tabs)/home.js
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+// app/(tabs)/home.tsx
+// ============================================
+// Pantalla de Inicio - Lista de Productos
+// Sesión 11: Home con Firebase Firestore
+// ============================================
+
+import { useRouter } from "expo-router";
+import React from "react";
+import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import CategoryChips from "../../src/components/CategoryChips";
 import ProductCard from "../../src/components/ProductCard";
+import { useAuth } from "../../src/hooks/useAuth";
 import { useCart } from "../../src/hooks/useCart";
 import { useProducts } from "../../src/hooks/useProducts";
+
 export default function HomeScreen() {
+  const router = useRouter();
+  const { user } = useAuth();
   const {
     products,
     categories,
-    selectedCategory,
     loading,
-    refreshing,
-    hasMore,
+    error,
+    selectedCategory,
+    loadProducts,
     filterByCategory,
-    loadMore,
-    refresh,
   } = useProducts();
-  const { addItem } = useCart();
-  // Spinner de carga inicial
-  if (loading && products.length === 0) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1A5276" />
-        <Text style={styles.loadingText}>Cargando productos...</Text>
-      </View>
-    );
-  }
+  const { addItem } = useCart(user?.id);
+
+  const handleProductPress = (product: any) => {
+    router.push(`/product/${product.id || product._id}` as any);
+  };
+
+  const handleAddToCart = async (product: any) => {
+    if (!user) {
+      router.push("/auth/login" as any);
+      return;
+    }
+    await addItem(product);
+  };
+
   return (
     <View style={styles.container}>
-      {/* Filtros de categoría */}
       <CategoryChips
         categories={categories}
         selected={selectedCategory}
         onSelect={filterByCategory}
       />
-      {/* Lista de productos con paginación */}
+
+      {error && <Text style={styles.error}>{error}</Text>}
+
       <FlatList
         data={products}
-        keyExtractor={(item) => item._id}
-        numColumns={2}
+        keyExtractor={(item) => item.id || item._id}
+        renderItem={({ item }) => {
+          const cat = (categories || []).find((c: any) => c.id === item.category);
+          return (
+            <ProductCard
+              product={item}
+              categoryName={cat?.name}
+              onPress={handleProductPress}
+              onAddToCart={handleAddToCart}
+            />
+          );
+        }}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <ProductCard product={item} onAddToCart={() => addItem(item)} />
-        )}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
-            colors={["#1A5276"]}
+            refreshing={loading}
+            onRefresh={() => loadProducts(selectedCategory)}
+            colors={["#2d6a4f"]}
           />
         }
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          hasMore ? (
-            <ActivityIndicator style={styles.footer} color="#1A5276" />
-          ) : null
-        }
         ListEmptyComponent={
-          <Text style={styles.empty}>No se encontraron productos</Text>
+          !loading ? (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>No hay productos disponibles</Text>
+            </View>
+          ) : null
         }
       />
     </View>
   );
 }
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F8F9FA" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loadingText: { marginTop: 12, color: "#7F8C8D", fontSize: 14 },
-  list: { padding: 8 },
-  footer: { paddingVertical: 20 },
-  empty: { textAlign: "center", marginTop: 40, color: "#95A5A6", fontSize: 16 },
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  list: { padding: 16 },
+  error: {
+    color: "#e63946",
+    textAlign: "center",
+    padding: 10,
+    backgroundColor: "#fdecea",
+    marginHorizontal: 16,
+    borderRadius: 8,
+  },
+  empty: { alignItems: "center", marginTop: 60 },
+  emptyIcon: { fontSize: 48, marginBottom: 12 },
+  emptyText: { fontSize: 16, color: "#888" },
 });

@@ -1,7 +1,11 @@
 // app/product/[id].tsx
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+// ============================================
+// Pantalla de Detalle de Producto
+// Sesión 11: Vista detallada con Firestore
+// ============================================
+
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -12,145 +16,147 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useAuth } from "../../src/hooks/useAuth";
 import { useCart } from "../../src/hooks/useCart";
-import { ProductAPI } from "../../src/services/apiService";
-import { Product, Category } from "../../src/types/types";
+import { useProducts } from "../../src/hooks/useProducts";
 
 export default function ProductDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const { addItem } = useCart();
-  // Consumo del endpoint GET /products/:id
+  const { id } = useLocalSearchParams();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { getProductById, categories } = useProducts();
+  const { addItem } = useCart(user?.id);
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await ProductAPI.getById(id);
-        setProduct(res.data || null);
-      } catch (err: any) {
-        Alert.alert("Error", err.message);
-      } finally {
-        setLoading(false);
-      }
+    const load = async () => {
+      const p = await getProductById(id as string);
+      setProduct(p);
+      setLoading(false);
     };
-    if (id) {
-      fetchProduct();
+    load();
+  }, [id, getProductById]);
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      router.push("/auth/login" as any);
+      return;
     }
-  }, [id]);
+    await addItem(product);
+    Alert.alert("Agregado", `${product.name} se agregó al carrito`);
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1A5276" />
+        <ActivityIndicator size="large" color="#2d6a4f" />
       </View>
     );
   }
+
   if (!product) {
     return (
       <View style={styles.center}>
-        <Ionicons name="alert-circle" size={48} color="#E74C3C" />
         <Text style={styles.errorText}>Producto no encontrado</Text>
       </View>
     );
   }
-  const handleAddToCart = async () => {
-    try {
-      await addItem(product);
-      Alert.alert("Agregado", `${product.name} agregado al carrito`);
-    } catch (err: any) {
-      Alert.alert("Error", err.message);
-    }
-  };
-
-  const categoryName = typeof product.category === 'object' && product.category !== null 
-    ? (product.category as Category).name 
-    : undefined;
 
   return (
     <ScrollView style={styles.container}>
-      <Image source={{ uri: product.image }} style={styles.image} />
+      <Image
+        source={{
+          uri:
+            product.image ||
+            "https://mrmark.com.mx/wp-content/uploads/2016/11/product-placeholder.jpg",
+        }}
+        style={styles.image}
+        resizeMode="cover"
+      />
+
       <View style={styles.content}>
-        <Text style={styles.category}>{categoryName}</Text>
-        <Text style={styles.name}>{product.name}</Text>
-        <Text style={styles.price}>S/ {product.price.toFixed(2)}</Text>
-        <Text style={styles.description}>{product.description}</Text>
-        {product.nutritionalInfo && (
-          <View style={styles.nutritionBox}>
-            <Text style={styles.nutritionTitle}>Información Nutricional</Text>
-            <Text>Calorías: {product.nutritionalInfo.calories}</Text>
-            <Text>Proteína: {product.nutritionalInfo.protein}</Text>
-            <Text>Fibra: {product.nutritionalInfo.fiber}</Text>
-          </View>
-        )}
-        <View style={styles.stockRow}>
-          <Ionicons
-            name={product.stock > 0 ? "checkmark-circle" : "close-circle"}
-            size={20}
-            color={product.stock > 0 ? "#148F77" : "#E74C3C"}
-          />
+        <View style={styles.row}>
+          <Text style={styles.category}>
+            {(categories || []).find((c: any) => c.id === product.category)?.name || product.category || "General"}
+          </Text>
           <Text
-            style={[
-              styles.stock,
-              { color: product.stock > 0 ? "#148F77" : "#E74C3C" },
-            ]}
+            style={[styles.stockBadge, product.stock <= 0 && styles.outOfStock]}
           >
-            {product.stock > 0 ? `${product.stock} disponibles` : "Agotado"}
+            {product.stock > 0 ? `Stock: ${product.stock}` : "Agotado"}
           </Text>
         </View>
-        <TouchableOpacity
-          style={[styles.addButton, !product.stock && styles.disabledButton]}
-          onPress={handleAddToCart}
-          disabled={!product.stock}
-        >
-          <Ionicons name="cart" size={22} color="#FFF" />
-          <Text style={styles.addButtonText}>Agregar al Carrito</Text>
-        </TouchableOpacity>
+
+        <Text style={styles.name}>{product.name}</Text>
+        <Text style={styles.price}>S/ {(product.price || 0).toFixed(2)}</Text>
+
+        <Text style={styles.descTitle}>Descripción</Text>
+        <Text style={styles.description}>
+          {product.description || "Sin descripción disponible."}
+        </Text>
+
+        {product.benefits && (
+          <>
+            <Text style={styles.descTitle}>Beneficios</Text>
+            <Text style={styles.description}>{product.benefits}</Text>
+          </>
+        )}
+
+        {product.stock > 0 && (
+          <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
+            <Text style={styles.addButtonText}>Agregar al Carrito</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF" },
+  container: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  image: { width: "100%", height: 300 },
+  image: { width: "100%", height: 280, backgroundColor: "#f0f0f0" },
   content: { padding: 20 },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
   category: {
     fontSize: 13,
-    color: "#148F77",
-    textTransform: "uppercase",
-    fontWeight: "600",
-  },
-  name: { fontSize: 24, fontWeight: "bold", color: "#1C2833", marginTop: 8 },
-  price: { fontSize: 28, fontWeight: "bold", color: "#1A5276", marginTop: 8 },
-  description: {
-    fontSize: 15,
-    color: "#566573",
-    marginTop: 16,
-    lineHeight: 22,
-  },
-  nutritionBox: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: "#E8F8F5",
-    borderRadius: 8,
-  },
-  nutritionTitle: { fontWeight: "bold", marginBottom: 8, color: "#148F77" },
-  stockRow: { flexDirection: "row", alignItems: "center", marginTop: 16 },
-  stock: { marginLeft: 8, fontSize: 14 },
-  addButton: {
-    flexDirection: "row",
-    backgroundColor: "#148F77",
-    padding: 16,
+    color: "#2d6a4f",
+    backgroundColor: "#e8f5e9",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     borderRadius: 12,
+    fontWeight: "500",
+    textTransform: "capitalize",
+  },
+  stockBadge: { fontSize: 12, color: "#666" },
+  outOfStock: { color: "#e63946", fontWeight: "600" },
+  name: { fontSize: 22, fontWeight: "700", color: "#1a1a2e", marginBottom: 6 },
+  price: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#2d6a4f",
+    marginBottom: 16,
+  },
+  descTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1a1a2e",
+    marginBottom: 6,
+    marginTop: 10,
+  },
+  description: { fontSize: 14, color: "#555", lineHeight: 22 },
+  addButton: {
+    backgroundColor: "#2d6a4f",
+    borderRadius: 12,
+    paddingVertical: 16,
     alignItems: "center",
-    justifyContent: "center",
     marginTop: 24,
   },
-  disabledButton: { backgroundColor: "#BDC3C7" },
-  addButtonText: {
-    color: "#FFF",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  errorText: { marginTop: 12, color: "#E74C3C", fontSize: 16 },
+  addButtonText: { color: "#fff", fontSize: 17, fontWeight: "700" },
+  errorText: { fontSize: 16, color: "#888" },
 });

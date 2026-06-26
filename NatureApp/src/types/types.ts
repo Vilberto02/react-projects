@@ -1,5 +1,6 @@
 export interface Category {
-  _id: string;
+  id?: string;
+  _id?: string;
   name: string;
   description: string;
   icon: string;
@@ -15,7 +16,8 @@ export interface NutritionalInfo {
 }
 
 export interface Product {
-  _id: string;
+  id?: string;
+  _id?: string;
   name: string;
   description: string;
   price: number;
@@ -30,18 +32,20 @@ export interface Product {
 }
 
 export interface User {
-  _id: string;
+  id?: string;
+  _id?: string;
   name: string;
   email: string;
-  phone: string;
-  address: {
+  phone?: string;
+  photoURL?: string;
+  address?: {
     street?: string;
     city?: string;
     zipCode?: string;
   };
-  role: 'customer' | 'admin';
-  createdAt: string;
-  updatedAt: string;
+  role?: 'customer' | 'admin';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface OrderItem {
@@ -54,7 +58,8 @@ export interface OrderItem {
 }
 
 export interface Order {
-  _id: string;
+  id?: string;
+  _id?: string;
   user: string | User;
   items: OrderItem[];
   total: number;

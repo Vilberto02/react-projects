@@ -1,133 +1,162 @@
 // app/(tabs)/orders.tsx
-import { Ionicons } from "@expo/vector-icons";
-import { useEffect } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useOrders } from "../../src/hooks/useOrders";
+// ============================================
+// Pantalla de Pedidos
+// Sesión 11: Historial de órdenes con Firestore
+// ============================================
 
-const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
-  pending: { label: "Pendiente", color: "#F39C12", icon: "time" },
-  confirmed: { label: "Confirmado", color: "#2E86C1", icon: "checkmark" },
-  shipped: { label: "Enviado", color: "#8E44AD", icon: "airplane" },
-  delivered: { label: "Entregado", color: "#148F77", icon: "checkmark-done" },
-  cancelled: { label: "Cancelado", color: "#E74C3C", icon: "close" },
-};
+import React, { useCallback } from 'react';
+import { View, FlatList, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { useAuth } from '../../src/hooks/useAuth';
+import { useOrders } from '../../src/hooks/useOrders';
+
+function OrderCard({ order, onCancel }: any) {
+  const statusColors: any = {
+    pending: '#f4a261',
+    confirmed: '#2a9d8f',
+    shipped: '#264653',
+    delivered: '#2d6a4f',
+    cancelled: '#e63946',
+  };
+
+  const statusLabels: any = {
+    pending: 'Pendiente',
+    confirmed: 'Confirmado',
+    shipped: 'Enviado',
+    delivered: 'Entregado',
+    cancelled: 'Cancelado',
+  };
+
+  let dateStr = '';
+  try {
+    const d = new Date(order.createdAt);
+    if (!isNaN(d.getTime())) {
+      dateStr = d.toLocaleDateString('es-PE');
+    }
+  } catch (e) {}
+
+  return (
+    <View style={styles.orderCard}>
+      <View style={styles.orderHeader}>
+        <Text style={styles.orderId}>Pedido #{(order.id || order._id || '').slice(-6).toUpperCase()}</Text>
+        <View style={[styles.badge, { backgroundColor: statusColors[order.status] || '#999' }]}>
+          <Text style={styles.badgeText}>{statusLabels[order.status] || order.status}</Text>
+        </View>
+      </View>
+
+      <Text style={styles.orderDate}>{dateStr}</Text>
+      
+      <Text style={styles.orderItems}>
+        {(order.items || []).map((i: any) => `${i.name} x${i.quantity}`).join(', ')}
+      </Text>
+
+      <View style={styles.orderFooter}>
+        <Text style={styles.orderTotal}>S/ {(order.total || 0).toFixed(2)}</Text>
+        {order.status === 'pending' && (
+          <TouchableOpacity onPress={() => onCancel?.(order.id || order._id)}>
+            <Text style={styles.cancelText}>Cancelar</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+}
 
 export default function OrdersScreen() {
-  const { orders, loading, loadOrders, cancelOrder } = useOrders();
-  useEffect(() => {
-    loadOrders();
-  }, [loadOrders]);
-  if (loading && orders.length === 0) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { orders, loading, loadOrders, cancelOrder } = useOrders(user?.id);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (user) loadOrders();
+    }, [user, loadOrders])
+  );
+
+  if (!user) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1A5276" />
+        <Text style={styles.emptyIcon}>🔒</Text>
+        <Text style={styles.emptyText}>Inicia sesión para ver tus pedidos</Text>
+        <TouchableOpacity style={styles.loginButton} onPress={() => router.push('/auth/login' as any)}>
+          <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+        </TouchableOpacity>
       </View>
     );
   }
+
   const handleCancel = (orderId: string) => {
-    Alert.alert("Cancelar Pedido", "¿Estás seguro?", [
-      { text: "No" },
-      { text: "Sí", style: "destructive", onPress: () => cancelOrder(orderId) },
+    Alert.alert('Cancelar Pedido', '¿Estás seguro?', [
+      { text: 'No' },
+      { text: 'Sí', style: 'destructive', onPress: () => cancelOrder(orderId) },
     ]);
   };
-  const renderOrder = ({ item }: { item: any }) => {
-    const status = STATUS_MAP[item.status] || STATUS_MAP.pending;
-    return (
-      <View style={styles.card}>
-        <View style={styles.header}>
-          <Text style={styles.orderId}>
-            Pedido #{item._id.slice(-6).toUpperCase()}
-          </Text>
-          <View style={[styles.badge, { backgroundColor: status.color }]}>
-            <Ionicons name={status.icon} size={14} color="#FFF" />
-            <Text style={styles.badgeText}>{status.label}</Text>
-          </View>
-        </View>
-        <Text style={styles.date}>
-          {new Date(item.createdAt).toLocaleDateString("es-PE")}
-        </Text>
-        <Text style={styles.items}>{item.items.length} producto(s)</Text>
-        <View style={styles.footer}>
-          <Text style={styles.total}>S/ {item.total.toFixed(2)}</Text>
-          {item.status === "pending" && (
-            <TouchableOpacity onPress={() => handleCancel(item._id)}>
-              <Text style={styles.cancelText}>Cancelar</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    );
-  };
+
   return (
     <View style={styles.container}>
       <FlatList
         data={orders}
-        keyExtractor={(item) => item._id}
-        renderItem={renderOrder}
+        keyExtractor={(item) => item.id || item._id}
+        renderItem={({ item }) => <OrderCard order={item} onCancel={handleCancel} />}
         contentContainerStyle={styles.list}
+        onRefresh={loadOrders}
+        refreshing={loading}
         ListEmptyComponent={
-          <View style={styles.center}>
-            <Ionicons name="receipt-outline" size={48} color="#BDC3C7" />
-            <Text style={styles.emptyText}>No tienes pedidos aún</Text>
-          </View>
+          !loading ? (
+            <View style={styles.center}>
+              <Text style={styles.emptyIcon}>📦</Text>
+              <Text style={styles.emptyText}>Aún no tienes pedidos</Text>
+            </View>
+          ) : null
         }
       />
     </View>
   );
 }
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F8F9FA" },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 60,
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  list: { padding: 16 },
+  emptyIcon: { fontSize: 60, marginBottom: 16 },
+  emptyText: { fontSize: 17, color: '#888', marginBottom: 20 },
+  loginButton: {
+    backgroundColor: '#2d6a4f',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
   },
-  list: { padding: 12 },
-  card: {
-    backgroundColor: "#FFF",
+  loginButtonText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  orderCard: {
+    backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    padding: 14,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  orderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  orderId: { fontSize: 15, fontWeight: "bold", color: "#1C2833" },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeText: { color: "#FFF", fontSize: 12, fontWeight: "600", marginLeft: 4 },
-  date: { fontSize: 13, color: "#7F8C8D", marginTop: 6 },
-  items: { fontSize: 13, color: "#566573", marginTop: 2 },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 12,
-    paddingTop: 12,
+  orderId: { fontSize: 15, fontWeight: '700', color: '#1a1a2e' },
+  badge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
+  badgeText: { color: '#fff', fontSize: 11, fontWeight: '600' },
+  orderDate: { fontSize: 12, color: '#888', marginTop: 4 },
+  orderItems: { fontSize: 13, color: '#555', marginTop: 6 },
+  orderFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: "#ECF0F1",
+    borderTopColor: '#f0f0f0',
+    paddingTop: 8,
   },
-  total: { fontSize: 18, fontWeight: "bold", color: "#1A5276" },
-  cancelText: { color: "#E74C3C", fontSize: 14, fontWeight: "600" },
-  emptyText: { marginTop: 12, color: "#95A5A6", fontSize: 15 },
+  orderTotal: { fontSize: 17, fontWeight: '700', color: '#2d6a4f' },
+  cancelText: { color: '#e63946', fontSize: 13, fontWeight: '600' },
 });

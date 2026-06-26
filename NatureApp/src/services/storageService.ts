@@ -1,85 +1,78 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// src/services/storageService.ts
 // ============================================
-// PERSISTENCIA BÁSICA - AsyncStorage
-// Equivale a SharedPreferences / UserDefaults
-// Para datos pequeños: preferencias, tokens, config
+// SERVICIO FIREBASE STORAGE
+// Sesión 11: Almacenamiento de imágenes
+// Subir y obtener URLs de imágenes de productos
 // ============================================
-const KEYS = {
-  USER_NAME: "@naturapp_user_name",
-  USER_EMAIL: "@naturapp_user_email",
-  AUTH_TOKEN: "@naturapp_auth_token",
-  THEME_DARK: "@naturapp_theme_dark",
-  NOTIFICATIONS: "@naturapp_notifications",
-  LAST_CATEGORY: "@naturapp_last_category",
-  ONBOARDING_DONE: "@naturapp_onboarding",
-};
+
+import { storage } from './firebaseConfig';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+
 const StorageService = {
-  // --- GUARDAR datos (Create/Update) ---
-  async saveUserProfile(name: string, email: string) {
+  // Subir imagen de producto
+  uploadProductImage: async (productId: string, imageUri: string) => {
     try {
-      // multiSet guarda múltiples pares clave-valor
-      await AsyncStorage.multiSet([
-        [KEYS.USER_NAME, name],
-        [KEYS.USER_EMAIL, email],
-      ]);
-      return true;
-    } catch (error) {
-      console.error("Error guardando perfil:", error);
-      return false;
+      // Convertir URI local a blob
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+
+      // Determinar extensión
+      const extension = imageUri.split('.').pop()?.split('?')[0] || 'jpg';
+      const fileName = `products/${productId}_${Date.now()}.${extension}`;
+
+      // Crear referencia y subir
+      const storageRef = ref(storage, fileName);
+      const snapshot = await uploadBytes(storageRef, blob);
+
+      // Obtener URL de descarga pública
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      console.log('Imagen subida:', downloadURL);
+      return downloadURL;
+    } catch (error: any) {
+      console.error('Error subiendo imagen:', error);
+      throw new Error('No se pudo subir la imagen: ' + error.message);
     }
   },
-  // --- LEER datos (Read) ---
-  async getUserProfile() {
+
+  // Subir avatar de usuario
+  uploadUserAvatar: async (userId: string, imageUri: string) => {
     try {
-      const values = await AsyncStorage.multiGet([
-        KEYS.USER_NAME,
-        KEYS.USER_EMAIL,
-      ]);
-      return {
-        name: values[0][1] || "",
-        email: values[1][1] || "",
-      };
-    } catch (error) {
-      console.error("Error leyendo perfil:", error);
-      return { name: "", email: "" };
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+
+      const extension = imageUri.split('.').pop()?.split('?')[0] || 'jpg';
+      const fileName = `avatars/${userId}.${extension}`;
+
+      const storageRef = ref(storage, fileName);
+      const snapshot = await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    } catch (error: any) {
+      console.error('Error subiendo avatar:', error);
+      throw new Error('No se pudo subir el avatar: ' + error.message);
     }
   },
-  // --- Preferencias booleanas ---
-  async setDarkTheme(enabled: boolean) {
-    await AsyncStorage.setItem(KEYS.THEME_DARK, JSON.stringify(enabled));
+
+  // Obtener URL de descarga de una imagen
+  getImageURL: async (path: string) => {
+    try {
+      const storageRef = ref(storage, path);
+      return await getDownloadURL(storageRef);
+    } catch (error) {
+      console.error('Error obteniendo URL:', error);
+      return null;
+    }
   },
-  async isDarkTheme() {
-    const val = await AsyncStorage.getItem(KEYS.THEME_DARK);
-    return val ? JSON.parse(val) : false;
-  },
-  async setNotifications(enabled: boolean) {
-    await AsyncStorage.setItem(KEYS.NOTIFICATIONS, JSON.stringify(enabled));
-  },
-  async getNotifications() {
-    const val = await AsyncStorage.getItem(KEYS.NOTIFICATIONS);
-    return val ? JSON.parse(val) : true;
-  },
-  // --- Token de autenticación ---
-  async saveToken(token: string) {
-    await AsyncStorage.setItem(KEYS.AUTH_TOKEN, token);
-  },
-  async getToken() {
-    return await AsyncStorage.getItem(KEYS.AUTH_TOKEN);
-  },
-  // --- ELIMINAR datos (Delete) ---
-  async logout() {
-    await AsyncStorage.multiRemove([
-      KEYS.AUTH_TOKEN,
-      KEYS.USER_NAME,
-      KEYS.USER_EMAIL,
-    ]);
-  },
-  // Guardar última categoría visitada
-  async saveLastCategory(category: string) {
-    await AsyncStorage.setItem(KEYS.LAST_CATEGORY, category);
-  },
-  async getLastCategory() {
-    return (await AsyncStorage.getItem(KEYS.LAST_CATEGORY)) || "todos";
+
+  // Eliminar imagen
+  deleteImage: async (path: string) => {
+    try {
+      const storageRef = ref(storage, path);
+      await deleteObject(storageRef);
+    } catch (error) {
+      console.error('Error eliminando imagen:', error);
+    }
   },
 };
+
 export default StorageService;

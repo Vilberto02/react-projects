@@ -1,58 +1,41 @@
 // src/components/CategoryChips.tsx
-import { Ionicons } from "@expo/vector-icons";
+// ============================================
+// Componente Chips de Categorías
+// Sesión 11: Filtro horizontal de categorías
+// ============================================
+
+import React from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { Category } from "../types/types";
 
-const ICONS: Record<string, string> = {
-  Superalimentos: "nutrition",
-  Infusiones: "cafe",
-  Suplementos: "fitness",
-  "Cuidado Personal": "flower",
-  Snacks: "fast-food",
-};
-
-interface CategoryChipsProps {
-  categories: Category[];
-  selected: string | null;
-  onSelect: (categoryId: string | null) => void;
-}
-
-export default function CategoryChips({ categories, selected, onSelect }: CategoryChipsProps) {
+export default function CategoryChips({ categories, selected, onSelect }: any) {
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={styles.container}
     >
       <TouchableOpacity
         style={[styles.chip, !selected && styles.chipActive]}
-        onPress={() => onSelect(null)}
+        onPress={() => onSelect?.(null)}
       >
-        <Ionicons
-          name="grid"
-          size={16}
-          color={!selected ? "#FFF" : "#1A5276"}
-        />
         <Text style={[styles.chipText, !selected && styles.chipTextActive]}>
           Todos
         </Text>
       </TouchableOpacity>
-      {categories.map((cat) => (
+
+      {(categories || []).map((cat: any) => (
         <TouchableOpacity
-          key={cat._id}
-          style={[styles.chip, selected === cat._id && styles.chipActive]}
-          onPress={() => onSelect(cat._id)}
+          key={cat.id || cat._id}
+          style={[
+            styles.chip,
+            selected === (cat.id || cat._id) && styles.chipActive,
+          ]}
+          onPress={() => onSelect?.(cat.id || cat._id)}
         >
-          <Ionicons
-            name={(ICONS[cat.name] || "leaf") as any}
-            size={16}
-            color={selected === cat._id ? "#FFF" : "#1A5276"}
-          />
           <Text
             style={[
               styles.chipText,
-              selected === cat._id && styles.chipTextActive,
+              selected === (cat.id || cat._id) && styles.chipTextActive,
             ]}
           >
             {cat.name}
@@ -62,29 +45,32 @@ export default function CategoryChips({ categories, selected, onSelect }: Catego
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
-    maxHeight: 52,
-    backgroundColor: "#FFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ECF0F1",
-  },
-  content: { paddingHorizontal: 12, paddingVertical: 8, alignItems: "center" },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 8,
+    height: 64,
+  },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 20,
-    backgroundColor: "#EBF5FB",
+    backgroundColor: "#f0f0f0",
     marginRight: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  chipActive: { backgroundColor: "#1A5276" },
+  chipActive: {
+    backgroundColor: "#2d6a4f",
+  },
   chipText: {
-    marginLeft: 6,
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#1A5276",
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
   },
-  chipTextActive: { color: "#FFF" },
+  chipTextActive: {
+    color: "#fff",
+    fontWeight: "600",
+  },
 });

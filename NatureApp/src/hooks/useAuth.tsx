@@ -1,81 +1,183 @@
 // src/hooks/useAuth.tsx
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useState } from "react";
-import { AuthAPI, clearToken, setToken } from "../services/apiService";
-import { User } from "../types/types";
+// ============================================
+// Hook de Autenticación - Firebase Auth
+// Sesión 11: Login, Registro, Logout con Firebase
+// ============================================
+
+import { useState, useEffect, useCallback } from 'react';
+import { auth, db } from '../services/firebaseConfig';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  updateProfile,
+} from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { User } from '../types/types';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Restaurar sesión al iniciar
+  // Escuchar cambios de estado de autenticación (Firebase observer)
   useEffect(() => {
-    const restoreSession = async () => {
-      try {
-        const token = await AsyncStorage.getItem("auth_token");
-        if (token) {
-          setToken(token);
-          const res = await AuthAPI.getProfile();
-          setUser(res.data || null);
+    let unsubscribe: () => void;
+    try {
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          // Usuario autenticado - obtener datos adicionales de Firestore
+          try {
+            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+            const userData = userDoc.exists() ? userDoc.data() : {};
+            setUser({
+              id: firebaseUser.uid,
+              _id: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: firebaseUser.displayName || userData.name || 'Usuario',
+              phone: userData.phone || '',
+              role: userData.role || 'customer',
+              photoURL: firebaseUser.photoURL || userData.photoURL || null,
+            });
+          } catch (err) {
+            // Si Firestore falla, usar datos básicos de Auth
+            setUser({
+              id: firebaseUser.uid,
+              _id: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: firebaseUser.displayName || 'Usuario',
+              role: 'customer',
+            });
+          }
+        } else {
+          setUser(null);
         }
-      } catch (err: any) {
-        await AsyncStorage.removeItem("auth_token");
-        clearToken();
-      } finally {
         setLoading(false);
-      }
+      });
+    } catch (err: any) {
+      // Firebase no configurado - modo offline
+      console.log('Firebase Auth no disponible:', err.message);
+      setLoading(false);
+    }
+    return () => {
+      if (unsubscribe) unsubscribe();
     };
-    restoreSession();
   }, []);
 
-  // Iniciar sesión
+  // Iniciar sesión con Firebase Auth
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await AuthAPI.login(email, password);
-      if (res.data) {
-        await AsyncStorage.setItem("auth_token", res.data.token);
-        setToken(res.data.token);
-        const loggedUser = { ...res.data.user, _id: res.data.user.id };
-        setUser(loggedUser);
-        return res.data;
-      }
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      return result.user;
     } catch (err: any) {
-      setError(err.message);
-      throw err;
-    } finally {
+      let message = 'Error de inicio de sesión';
+      switch (err.code) {
+        case 'auth/user-not-found':
+          message = 'No existe una cuenta con este email';
+          break;
+        case 'auth/wrong-password':
+          message = 'Contraseña incorrecta';
+          break;
+        case 'auth/invalid-email':
+          message = 'Email inválido';
+          break;
+        case 'auth/too-many-requests':
+          message = 'Demasiados intentos. Intenta más tarde';
+          break;
+        case 'auth/invalid-credential':
+          message = 'Credenciales inválidas';
+          break;
+        default:
+          // Fallback para modo desarrollo sin Firebase configurado
+          if (
+            err.message?.includes('auth/configuration-not-found') ||
+            err.code === 'auth/api-key-not-valid'
+          ) {
+            setUser({
+              id: 'local-1',
+              _id: 'local-1',
+              email,
+              name: 'Usuario Demo',
+              role: 'customer',
+            });
+            setLoading(false);
+            return { uid: 'local-1', email };
+          }
+          message = err.message;
+      }
+      setError(message);
       setLoading(false);
+      throw new Error(message);
     }
   }, []);
 
-  // Registrarse
+  // Registrar usuario nuevo con Firebase Auth + guardar perfil en Firestore
   const register = useCallback(async (userData: any) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await AuthAPI.register(userData);
-      if (res.data) {
-        await AsyncStorage.setItem("auth_token", res.data.token);
-        setToken(res.data.token);
-        const loggedUser = { ...res.data.user, _id: res.data.user.id };
-        setUser(loggedUser);
-        return res.data;
-      }
+      // Crear cuenta en Firebase Auth
+      const result = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+
+      // Actualizar displayName en Auth
+      await updateProfile(result.user, { displayName: userData.name });
+
+      // Guardar datos adicionales en Firestore
+      await setDoc(doc(db, 'users', result.user.uid), {
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone || '',
+        role: 'customer',
+        createdAt: new Date().toISOString(),
+      });
+
+      return result.user;
     } catch (err: any) {
-      setError(err.message);
-      throw err;
-    } finally {
+      let message = 'Error de registro';
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          message = 'Este email ya está registrado';
+          break;
+        case 'auth/weak-password':
+          message = 'La contraseña es muy débil (mínimo 6 caracteres)';
+          break;
+        case 'auth/invalid-email':
+          message = 'Email inválido';
+          break;
+        default:
+          if (
+            err.message?.includes('configuration-not-found') ||
+            err.code === 'auth/api-key-not-valid'
+          ) {
+            setUser({
+              id: 'local-1',
+              _id: 'local-1',
+              email: userData.email,
+              name: userData.name,
+              role: 'customer',
+            });
+            setLoading(false);
+            return { uid: 'local-1', email: userData.email };
+          }
+          message = err.message;
+      }
+      setError(message);
       setLoading(false);
+      throw new Error(message);
     }
   }, []);
 
   // Cerrar sesión
   const logout = useCallback(async () => {
-    await AsyncStorage.removeItem("auth_token");
-    clearToken();
-    setUser(null);
+    try {
+      await signOut(auth);
+    } catch (err) {
+      // Modo offline
+      setUser(null);
+    }
   }, []);
 
   return { user, loading, error, login, register, logout };

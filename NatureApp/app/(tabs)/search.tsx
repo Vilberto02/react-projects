@@ -1,92 +1,128 @@
 // app/(tabs)/search.tsx
-import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useState } from "react";
+// ============================================
+// Pantalla de Búsqueda
+// Sesión 11: Búsqueda client-side con Firestore
+// ============================================
+
+import { useRouter } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import ProductCard from "../../src/components/ProductCard";
+import { useAuth } from "../../src/hooks/useAuth";
 import { useCart } from "../../src/hooks/useCart";
-import { ProductAPI } from "../../src/services/apiService";
-import { Product } from "../../src/types/types";
+import { useProducts } from "../../src/hooks/useProducts";
 
 export default function SearchScreen() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { products, categories, loading, searchProducts, loadProducts } = useProducts();
+  const { addItem } = useCart(user?.id);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const { addItem } = useCart();
-  // Búsqueda con debounce manual
-  const handleSearch = useCallback(async (text: string) => {
-    setQuery(text);
-    if (text.length < 2) {
-      setResults([]);
+
+  const handleSearch = () => {
+    if (query.trim()) {
+      searchProducts(query.trim());
+    } else {
+      loadProducts();
+    }
+  };
+
+  const handleAddToCart = async (product: any) => {
+    if (!user) {
+      router.push("/auth/login" as any);
       return;
     }
-    setLoading(true);
-    setSearched(true);
-    try {
-      const res = await ProductAPI.search(text);
-      setResults(res.data || []);
-    } catch (err: any) {
-      console.error("Error en búsqueda:", err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    await addItem(product);
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.searchBar}>
-        <Ionicons name="search" size={20} color="#95A5A6" />
+      <View style={styles.searchRow}>
         <TextInput
           style={styles.input}
           placeholder="Buscar productos naturales..."
           value={query}
-          onChangeText={handleSearch}
-          placeholderTextColor="#95A5A6"
+          onChangeText={setQuery}
+          onSubmitEditing={handleSearch}
+          returnKeyType="search"
         />
+        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+          <Ionicons name="search" color="#fff" size={24} />
+        </TouchableOpacity>
       </View>
-      {loading ? (
-        <ActivityIndicator style={styles.loader} size="large" color="#1A5276" />
-      ) : (
-        <FlatList
-          data={results}
-          keyExtractor={(item) => item._id}
-          numColumns={2}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <ProductCard product={item} onAddToCart={() => addItem(item)} />
-          )}
-          ListEmptyComponent={
-            searched ? (
-              <Text style={styles.empty}>No se encontraron resultados</Text>
-            ) : null
-          }
-        />
-      )}
+
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.id || item._id}
+        renderItem={({ item }) => {
+          const cat = (categories || []).find((c: any) => c.id === item.category);
+          return (
+            <ProductCard
+              product={item}
+              categoryName={cat?.name}
+              onPress={(p: any) =>
+                router.push(`/product/${p.id || p._id}` as any)
+              }
+              onAddToCart={handleAddToCart}
+            />
+          );
+        }}
+        contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          !loading ? (
+            <View style={styles.empty}>
+              <Text style={styles.emptyIcon}>🔍</Text>
+              <Text style={styles.emptyText}>
+                {query
+                  ? "No se encontraron resultados"
+                  : "Escribe para buscar productos"}
+              </Text>
+            </View>
+          ) : null
+        }
+      />
     </View>
   );
 }
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F8F9FA" },
-  searchBar: {
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  searchRow: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFF",
-    margin: 12,
-    padding: 12,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    padding: 16,
+    gap: 10,
   },
-  input: { flex: 1, marginLeft: 10, fontSize: 16, color: "#2C3E50" },
-  loader: { marginTop: 40 },
-  list: { padding: 8 },
-  empty: { textAlign: "center", marginTop: 40, color: "#95A5A6", fontSize: 15 },
+  input: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  searchButton: {
+    backgroundColor: "#2d6a4f",
+    borderRadius: 12,
+    width: 48,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  searchButtonText: { fontSize: 20 },
+  list: { padding: 16, paddingTop: 0 },
+  empty: { alignItems: "center", marginTop: 60 },
+  emptyIcon: { fontSize: 48, marginBottom: 12 },
+  emptyText: { fontSize: 16, color: "#888", textAlign: "center" },
 });
