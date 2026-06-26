@@ -16,15 +16,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "../src/hooks/useAuth";
-import { useCart } from "../src/hooks/useCart";
-import { useOrders } from "../src/hooks/useOrders";
+import { useAuthStore } from "../src/store/authStore";
+import { useCartStore } from "../src/store/cartStore";
+import { useOrderStore } from "../src/store/orderStore";
 
 export default function CheckoutScreen() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { items, total, clearCart } = useCart(user?.id);
-  const { createOrder } = useOrders(user?.id);
+  const user = useAuthStore((state) => state.user);
+  const { items, total, clearCart } = useCartStore();
+  const createOrder = useOrderStore((state) => state.createOrder);
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -41,7 +41,7 @@ export default function CheckoutScreen() {
 
     setSubmitting(true);
     try {
-      const order = await createOrder({
+      const order = await createOrder(user?.id || user?._id || '', {
         items: items.map((i: any) => ({
           productId: i.productId || i.id,
           name: i.name,
@@ -56,7 +56,7 @@ export default function CheckoutScreen() {
       });
 
       if (order) {
-        await clearCart();
+        await clearCart(user?.id || user?._id || '');
         Alert.alert(
           "Pedido Confirmado",
           "Tu pedido ha sido registrado exitosamente.",

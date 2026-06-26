@@ -7,11 +7,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../src/hooks/useAuth';
+import { useAuthStore } from '../../src/store/authStore';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthStore();
 
   if (!user) {
     return (

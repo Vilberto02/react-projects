@@ -2,13 +2,11 @@
 // ============================================
 // Pantalla de Pedidos
 // Sesión 11: Historial de órdenes con Firestore
-// ============================================
-
 import React, { useCallback } from 'react';
 import { View, FlatList, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { useAuth } from '../../src/hooks/useAuth';
-import { useOrders } from '../../src/hooks/useOrders';
+import { useRouter } from 'expo-router';
+import { useAuthStore } from '../../src/store/authStore';
+import { useOrderStore } from '../../src/store/orderStore';
 
 function OrderCard({ order, onCancel }: any) {
   const statusColors: any = {
@@ -64,14 +62,12 @@ function OrderCard({ order, onCancel }: any) {
 
 export default function OrdersScreen() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { orders, loading, loadOrders, cancelOrder } = useOrders(user?.id);
+  const user = useAuthStore((state) => state.user);
+  const { orders, loading, loadOrders, cancelOrder } = useOrderStore();
 
-  useFocusEffect(
-    useCallback(() => {
-      if (user) loadOrders();
-    }, [user, loadOrders])
-  );
+  React.useEffect(() => {
+    if (user) loadOrders(user.id || user._id || '');
+  }, [user, loadOrders]);
 
   if (!user) {
     return (
@@ -88,7 +84,7 @@ export default function OrdersScreen() {
   const handleCancel = (orderId: string) => {
     Alert.alert('Cancelar Pedido', '¿Estás seguro?', [
       { text: 'No' },
-      { text: 'Sí', style: 'destructive', onPress: () => cancelOrder(orderId) },
+      { text: 'Sí', style: 'destructive', onPress: () => cancelOrder(user.id || user._id || '', orderId) },
     ]);
   };
 
@@ -99,7 +95,7 @@ export default function OrdersScreen() {
         keyExtractor={(item) => item.id || item._id}
         renderItem={({ item }) => <OrderCard order={item} onCancel={handleCancel} />}
         contentContainerStyle={styles.list}
-        onRefresh={loadOrders}
+        onRefresh={() => { if(user) loadOrders(user.id || user._id || '') }}
         refreshing={loading}
         ListEmptyComponent={
           !loading ? (

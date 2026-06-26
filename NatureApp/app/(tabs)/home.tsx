@@ -9,13 +9,15 @@ import React from "react";
 import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import CategoryChips from "../../src/components/CategoryChips";
 import ProductCard from "../../src/components/ProductCard";
-import { useAuth } from "../../src/hooks/useAuth";
-import { useCart } from "../../src/hooks/useCart";
-import { useProducts } from "../../src/hooks/useProducts";
+import { useAuthStore } from "../../src/store/authStore";
+import { useCartStore } from "../../src/store/cartStore";
+import { useProductStore } from "../../src/store/productStore";
+import { useEffect } from "react";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const user = useAuthStore((state) => state.user);
+  
   const {
     products,
     categories,
@@ -23,9 +25,16 @@ export default function HomeScreen() {
     error,
     selectedCategory,
     loadProducts,
+    loadCategories,
     filterByCategory,
-  } = useProducts();
-  const { addItem } = useCart(user?.id);
+  } = useProductStore();
+
+  const addItem = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    loadProducts();
+    loadCategories();
+  }, [loadProducts, loadCategories]);
 
   const handleProductPress = (product: any) => {
     router.push(`/product/${product.id || product._id}` as any);
@@ -36,7 +45,7 @@ export default function HomeScreen() {
       router.push("/auth/login" as any);
       return;
     }
-    await addItem(product);
+    await addItem(user.id || user._id || '', product);
   };
 
   return (

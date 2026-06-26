@@ -7,11 +7,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../src/hooks/useAuth';
+import { useAuthStore } from '../../src/store/authStore';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { register, loading, error } = useAuth();
+  const { register, loading, error } = useAuthStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');

@@ -16,16 +16,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "../../src/hooks/useAuth";
-import { useCart } from "../../src/hooks/useCart";
-import { useProducts } from "../../src/hooks/useProducts";
+import { useAuthStore } from "../../src/store/authStore";
+import { useCartStore } from "../../src/store/cartStore";
+import { useProductStore } from "../../src/store/productStore";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
-  const { getProductById, categories } = useProducts();
-  const { addItem } = useCart(user?.id);
+  const user = useAuthStore((state) => state.user);
+  const { getProductById, categories } = useProductStore();
+  const addItem = useCartStore((state) => state.addItem);
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +43,7 @@ export default function ProductDetailScreen() {
       router.push("/auth/login" as any);
       return;
     }
-    await addItem(product);
+    await addItem(user.id || user._id || '', product);
     Alert.alert("Agregado", `${product.name} se agregó al carrito`);
   };
 

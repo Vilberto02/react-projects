@@ -14,14 +14,13 @@ import {
   View,
 } from "react-native";
 import CartItemRow from "../../src/components/CartItemRow";
-import { useAuth } from "../../src/hooks/useAuth";
-import { useCart } from "../../src/hooks/useCart";
+import { useAuthStore } from "../../src/store/authStore";
+import { useCartStore } from "../../src/store/cartStore";
 
 export default function CartScreen() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { items, total, itemCount, updateQuantity, removeItem, clearCart } =
-    useCart(user?.id);
+  const user = useAuthStore((state) => state.user);
+  const { items, total, itemCount, updateQuantity, removeItem, clearCart } = useCartStore();
 
   if (!user) {
     return (
@@ -60,8 +59,9 @@ export default function CartScreen() {
         renderItem={({ item }) => (
           <CartItemRow
             item={item}
-            onUpdateQuantity={updateQuantity}
-            onRemove={removeItem}
+            onIncrease={() => updateQuantity(user.id || user._id || '', item.id || item.productId, item.quantity + 1)}
+            onDecrease={() => updateQuantity(user.id || user._id || '', item.id || item.productId, item.quantity - 1)}
+            onRemove={() => removeItem(user.id || user._id || '', item.id || item.productId)}
           />
         )}
         contentContainerStyle={styles.list}
@@ -74,7 +74,10 @@ export default function CartScreen() {
         </View>
 
         <View style={styles.footerButtons}>
-          <TouchableOpacity style={styles.clearButton} onPress={clearCart}>
+          <TouchableOpacity
+            style={styles.clearButton}
+            onPress={() => clearCart(user.id || user._id || '')}
+          >
             <Text style={styles.clearButtonText}>Vaciar</Text>
           </TouchableOpacity>
           <TouchableOpacity

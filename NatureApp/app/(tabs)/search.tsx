@@ -16,15 +16,15 @@ import {
   View,
 } from "react-native";
 import ProductCard from "../../src/components/ProductCard";
-import { useAuth } from "../../src/hooks/useAuth";
-import { useCart } from "../../src/hooks/useCart";
-import { useProducts } from "../../src/hooks/useProducts";
+import { useAuthStore } from "../../src/store/authStore";
+import { useCartStore } from "../../src/store/cartStore";
+import { useProductStore } from "../../src/store/productStore";
 
 export default function SearchScreen() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { products, categories, loading, searchProducts, loadProducts } = useProducts();
-  const { addItem } = useCart(user?.id);
+  const user = useAuthStore((state) => state.user);
+  const { products, categories, loading, searchProducts, loadProducts } = useProductStore();
+  const addItem = useCartStore((state) => state.addItem);
   const [query, setQuery] = useState("");
 
   const handleSearch = () => {
@@ -40,7 +40,7 @@ export default function SearchScreen() {
       router.push("/auth/login" as any);
       return;
     }
-    await addItem(product);
+    await addItem(user.id || user._id || '', product);
   };
 
   return (
