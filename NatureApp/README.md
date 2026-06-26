@@ -48,18 +48,16 @@ Lo que se hizo en la integración:
    npm install
    ```
 
-3. **Configura Firebase**:
-   Abre el archivo `src/services/firebaseConfig.ts` y reemplaza el bloque de configuración con las credenciales de tu proyecto de Firebase.
+3. **Configura Firebase (Variables de Entorno)**:
+   Renombra el archivo `.env.example` como `.env` en la raíz del proyecto y agrega las credenciales de tu proyecto de Firebase. Es importante usar el prefijo `EXPO_PUBLIC_` para que Expo pueda leerlas en la aplicación.
 
-   ```typescript
-   const firebaseConfig = {
-     apiKey: "TU_API_KEY",
-     authDomain: "tu-proyecto.firebaseapp.com",
-     projectId: "tu-proyecto",
-     storageBucket: "tu-proyecto.appspot.com",
-     messagingSenderId: "TUS_SENDER_ID",
-     appId: "TU_APP_ID",
-   };
+   ```env
+   EXPO_PUBLIC_API_KEY="TU_API_KEY"
+   EXPO_PUBLIC_AUTH_DOMAIN="tu-proyecto.firebaseapp.com"
+   EXPO_PUBLIC_PROJECT_ID="tu-proyecto"
+   EXPO_PUBLIC_STORAGE_BUCKET="tu-proyecto.appspot.com"
+   EXPO_PUBLIC_MESSAGING_SENDER_ID="TUS_SENDER_ID"
+   EXPO_PUBLIC_APP_ID="TU_APP_ID"
    ```
 
 4. **Poblar la Base de Datos (Seeding)**:
@@ -93,3 +91,11 @@ npx expo start
   ├── services   # Integraciones directas con Firebase
   └── types      # Interfaces y modelos de TypeScript
 ```
+
+## Vista previa de la aplicación
+
+![Home](./screens/home.jpg)
+![Productos](./screens/producto_detalle.jpg)
+![Carrito](./screens/carrito.jpg)
+![Checkout](./screens/compra.jpg)
+![Pedidos](./screens/pedidos.jpg)
