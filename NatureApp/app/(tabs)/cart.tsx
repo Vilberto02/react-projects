@@ -59,9 +59,8 @@ export default function CartScreen() {
         renderItem={({ item }) => (
           <CartItemRow
             item={item}
-            onIncrease={() => updateQuantity(user.id || user._id || '', item.id || item.productId, item.quantity + 1)}
-            onDecrease={() => updateQuantity(user.id || user._id || '', item.id || item.productId, item.quantity - 1)}
-            onRemove={() => removeItem(user.id || user._id || '', item.id || item.productId)}
+            onUpdateQuantity={(productId: string, quantity: number) => updateQuantity(user.id || user._id || '', productId, quantity)}
+            onRemove={(productId: string) => removeItem(user.id || user._id || '', productId)}
           />
         )}
         contentContainerStyle={styles.list}
