@@ -8,7 +8,6 @@ Colección de proyectos, aplicaciones completas y ejercicios prácticos desarrol
 React-Projects/
 ├── auth-basic/               # Implementación básica de autenticación
 ├── basic-concepts/           # Prácticas sobre conceptos básicos de React
-├── carta-interactiva-boda/   # Carta de invitación interactiva para boda
 ├── clasificacion-tumores/    # Interfaz para clasificación de tumores (IA/Medicina)
 ├── ejercicioS7/              # Ejercicio de práctica (Semana 7)
 ├── email-checker/            # Aplicación para validación o verificación de correos
